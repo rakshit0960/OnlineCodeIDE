@@ -1,0 +1,16 @@
+{
+  "plugin": [
+    // "typedoc-plugin-markdown"
+    "typedoc-github-theme"
+  ],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "skipErrorChecking": true,
+  "entryPoints": [
+    "src"
+  ],
+  "name": "Online Code Compiler",
+  "includeVersion": true,
+  "categorizeByGroup": true,
+  "searchInComments": true
+}
