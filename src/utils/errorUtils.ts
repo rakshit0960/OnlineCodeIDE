@@ -9,7 +9,7 @@ import { formatZodError } from "@/lib/validations";
  * @returns A NextResponse with the error message and status code
  */
 export function handleApiError(error: unknown, status = 500) {
-
+  console.error(error);
   // Handle Zod validation errors
   if (error instanceof ZodError) {
     const formattedError = formatZodError(error);

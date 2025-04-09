@@ -5,8 +5,10 @@ export interface ProjectFile {
   content?: string;
   language?: string;
   isFolder: boolean;
+  path: string;
   children: ProjectFile[];
 }
+
 
 export const exampleFiles: ProjectFile[] = [
   {
@@ -15,6 +17,7 @@ export const exampleFiles: ProjectFile[] = [
     language: "python",
     content: "print('Hello, World!');",
     isFolder: false,
+    path: "/app/project.py",
     children: [],
   },
   {
@@ -23,6 +26,7 @@ export const exampleFiles: ProjectFile[] = [
     language: "javascript",
     content: "console.log('Hello, World!');",
     isFolder: false,
+    path: "/app/index.js",
     children: [],
   },
   {
@@ -31,6 +35,7 @@ export const exampleFiles: ProjectFile[] = [
     language: "HTML",
     content: "<h1>Hello, World!</h1>",
     isFolder: false,
+    path: "/app/index.html",
     children: [],
   },
   {
@@ -38,6 +43,7 @@ export const exampleFiles: ProjectFile[] = [
     name: "styles",
     content: "",
     isFolder: true,
+    path: "/app/styles",
     children: [
       {
         id: "4",
@@ -45,6 +51,7 @@ export const exampleFiles: ProjectFile[] = [
         language: "CSS",
         content: "body { font-family: Arial, sans-serif; }",
         isFolder: false,
+        path: "/app/styles/styles.css",
         children: [],
       },
       {
@@ -53,6 +60,7 @@ export const exampleFiles: ProjectFile[] = [
         language: "CSS",
         content: "*, *::before, *::after { box-sizing: border-box; }",
         isFolder: false,
+        path: "/app/styles/reset.css",
         children: [],
       },
     ],

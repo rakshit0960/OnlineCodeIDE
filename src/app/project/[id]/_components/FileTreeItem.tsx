@@ -1,9 +1,11 @@
 import { ProjectFile } from "@/app/project/types";
 import { twMerge } from "tailwind-merge";
 import { FaFolder } from "react-icons/fa";
+import { ImSpinner8 } from "react-icons/im";
 import LanguageIcon from "@/components/LanguageIcon";
 import { useProjectFileStore } from "@/store/projectFileStore";
-
+import { useParams } from "next/navigation";
+import { useState } from "react";
 
 interface FileTreeItemProps {
   file: ProjectFile;
@@ -12,10 +14,39 @@ interface FileTreeItemProps {
 export default function FileTreeItem({ file }: FileTreeItemProps) {
   const isFolder = file.isFolder;
   const { setActiveFile } = useProjectFileStore();
+  const params = useParams();
+  const projectId = params.id as string;
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFileClick = async () => {
+    if (isFolder) return;
+
+    setIsLoading(true);
+    try {
+      // Fetch file content from the API
+      const response = await fetch(`/api/projects/${projectId}/container/files${file.path}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch file content');
+      }
+      const data = await response.json();
+
+      // Update the file object with content
+      const fileWithContent = {
+        ...file,
+        content: data.content
+      };
+
+      setActiveFile(fileWithContent);
+    } catch (error) {
+      console.error('Error fetching file content:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div
-      onClick={() => (!isFolder && setActiveFile(file))} // if it's a folder, don't do anything
+      onClick={handleFileClick}
       className={twMerge("py-0.5 px-0.5 rounded-md", !isFolder && "cursor-pointer")}
     >
       <div
@@ -27,6 +58,8 @@ export default function FileTreeItem({ file }: FileTreeItemProps) {
       >
         {isFolder ? (
           <FaFolder className="text-yellow-500" size={13} />
+        ) : isLoading ? (
+          <ImSpinner8 className="text-blue-500 animate-spin" size={13} />
         ) : (
           <LanguageIcon language={file.language || ""} className="text-gray-400" />
         )}

@@ -19,7 +19,7 @@ export default function TerminalClient() {
 
     // Create a new terminal instance for each component mount
     const term = new Terminal({
-      cursorBlink: true,    
+      cursorBlink: true,
       fontSize: 14,
       fontFamily: 'Menlo, Monaco, "Courier New", monospace',
       scrollback: 1000, // Enable scrollback buffer

@@ -3,22 +3,47 @@ import { Project } from "@prisma/client";
 import { FaPlay, FaSave } from "react-icons/fa";
 import { ImSpinner8 } from "react-icons/im";
 import { useProjectFileStore } from "@/store/projectFileStore";
-
+import { useParams } from "next/navigation";
+import { useState } from "react";
 
 interface ProjectHeaderProps {
   project: Project;
   isRunning: boolean;
-  onSave: () => void;
   onRun: () => void;
 }
 
 export default function ProjectHeader({
   project,
   isRunning,
-  onSave,
   onRun
 }: ProjectHeaderProps) {
   const { activeFile } = useProjectFileStore();
+  const params = useParams();
+  const projectId = params.id as string;
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!activeFile) return;
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/container/files${activeFile.path}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: activeFile.content }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save file');
+      }
+    } catch (error) {
+      console.error('Error saving file:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="flex h-14 items-center justify-between border-b border-gray-700 bg-gray-800 px-4">
@@ -31,11 +56,21 @@ export default function ProjectHeader({
 
       <div className="flex items-center space-x-3">
         <button
-          onClick={onSave}
-          className="flex items-center rounded-md bg-gray-700 px-3 py-1.5 text-sm text-gray-200 hover:bg-gray-600"
+          onClick={handleSave}
+          disabled={isSaving || !activeFile}
+          className="flex items-center rounded-md bg-gray-700 px-3 py-1.5 text-sm text-gray-200 hover:bg-gray-600 disabled:opacity-50"
         >
-          <FaSave className="mr-1.5 h-3.5 w-3.5" />
-          Save
+          {isSaving ? (
+            <>
+              <ImSpinner8 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <FaSave className="mr-1.5 h-3.5 w-3.5" />
+              Save
+            </>
+          )}
         </button>
 
         <button
