@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { FaSpinner } from "react-icons/fa";
 
 interface ConsoleProps {
-  output: string;
+  output: { stdout: string, stderr: string };
   isRunning: boolean;
   input: string;
   setInput: (input: string) => void;
@@ -46,12 +46,25 @@ export default function Console({ output, isRunning, input, setInput }: ConsoleP
             ref={outputRef}
             className="h-[calc(100%-30px)] overflow-auto p-4 font-jetbrains text-sm text-neutral-200 bg-neutral-950 leading-relaxed"
           >
-            {output.split('\n').map((line, index) => (
-              <div key={index} className="whitespace-pre-wrap">
+            {/* Standard output */}
+            {output.stdout.split('\n').map((line, index) => (
+              <div key={`stdout-${index}`} className="whitespace-pre-wrap">
                 {line || ' '}
               </div>
             ))}
-            {isRunning && output.length > 0 && (
+
+            {/* Standard error */}
+            {output.stderr && (
+              <div className="mt-2">
+                {output.stderr.split('\n').map((line, index) => (
+                  <div key={`stderr-${index}`} className="whitespace-pre-wrap text-red-400">
+                    {line || ' '}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {isRunning && (output.stdout.length > 0 || output.stderr.length > 0) && (
               <div className="text-blue-400 mt-2">
                 <FaSpinner className="animate-spin inline mr-2" />
                 Processing...

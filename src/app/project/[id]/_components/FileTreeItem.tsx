@@ -1,77 +1,131 @@
 import { ProjectFile } from "@/app/project/types";
-import { twMerge } from "tailwind-merge";
-import { FaFolder } from "react-icons/fa";
-import { ImSpinner8 } from "react-icons/im";
 import LanguageIcon from "@/components/LanguageIcon";
+import { useFileContent } from "@/hooks/useFileContent";
+import { useSaveFile } from "@/hooks/useSaveFile";
 import { useProjectFileStore } from "@/store/projectFileStore";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import { IoMdFolder, IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
+import { ImSpinner8 } from "react-icons/im";
+import { twMerge } from "tailwind-merge";
 
 interface FileTreeItemProps {
   file: ProjectFile;
+  level: number;
 }
 
-export default function FileTreeItem({ file }: FileTreeItemProps) {
+export default function FileTreeItem({ file, level }: FileTreeItemProps) {
   const isFolder = file.isFolder;
-  const { setActiveFile } = useProjectFileStore();
+  const { activeFile, setActiveFile } = useProjectFileStore();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isSaving, setIsSaving] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const params = useParams();
   const projectId = params.id as string;
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleFileClick = async () => {
-    if (isFolder) return;
-
-    setIsLoading(true);
-    try {
-      // Fetch file content from the API
-      const response = await fetch(`/api/projects/${projectId}/container/files${file.path}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch file content');
-      }
-      const data = await response.json();
-
-      // Update the file object with content
-      const fileWithContent = {
-        ...file,
-        content: data.content
-      };
-
-      setActiveFile(fileWithContent);
-    } catch (error) {
-      console.error('Error fetching file content:', error);
-    } finally {
-      setIsLoading(false);
+  const { data: fileContent, isLoading: isFileContentLoading } = useFileContent(
+    {
+      projectId,
+      filePath: file.path,
+      isFolder,
     }
+  );
+  const { mutate: saveFile } = useSaveFile();
+
+  const handleFileClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    if (isFolder) {
+      setIsExpanded(!isExpanded);
+      return;
+    }
+
+    // Create file with content object regardless of path
+    const fileWithContent = {
+      ...file,
+      content: fileContent,
+    };
+
+    /*
+    // If there's an active file, save it first
+    if (activeFile) {
+      setIsSaving(true);
+      saveFile(
+        {
+          projectId,
+          filePath: activeFile.path,
+          content: activeFile.content || "",
+        },
+        {
+          onSuccess: () => {
+            setActiveFile(fileWithContent);
+            setIsSaving(false);
+          },
+          onError: () => {
+            setIsSaving(false);
+          },
+        }
+      );
+    } else {
+      // Just set the new file as active
+      setActiveFile(fileWithContent);
+    }
+  */
+
+    if (activeFile) {
+      saveFile({
+        projectId,
+        filePath: activeFile.path,
+        content: activeFile.content || "",
+      });
+    }
+    setActiveFile(fileWithContent);
+  };
+
+  const indentStyle = {
+    paddingLeft: `${level * 16}px`,
   };
 
   return (
     <div
       onClick={handleFileClick}
-      className={twMerge("py-0.5 px-0.5 rounded-md", !isFolder && "cursor-pointer")}
+      className={twMerge(
+        "group relative py-0.5",
+        !isFolder && "cursor-pointer"
+      )}
+      style={indentStyle}
     >
       <div
         className={twMerge(
-          "hover:bg-gray-700 transition-colors duration-150 rounded-md p-1.5",
-          "flex items-center gap-1.5 text-sm font-medium cursor-pointer",
-          isFolder ? "text-blue-400" : "text-gray-300"
+          "flex items-center gap-2 px-2.5 py-1.5 rounded-md",
+          "hover:bg-gray-700/50 transition-colors duration-150",
+          "text-sm font-medium",
+          isFolder ? "text-blue-400" : "text-gray-300",
+          activeFile?.path === file.path && "bg-blue-500/10"
         )}
       >
         {isFolder ? (
-          <FaFolder className="text-yellow-500" size={13} />
-        ) : isLoading ? (
-          <ImSpinner8 className="text-blue-500 animate-spin" size={13} />
+          <div className="flex items-center gap-1.5">
+            {isExpanded ? (
+              <IoIosArrowDown className="text-gray-400" size={14} />
+            ) : (
+              <IoIosArrowForward className="text-gray-400" size={14} />
+            )}
+            <IoMdFolder className="text-blue-400" size={16} />
+          </div>
+        ) : isFileContentLoading || isSaving ? (
+          <ImSpinner8 className="text-blue-500 animate-spin" size={14} />
         ) : (
-          <LanguageIcon language={file.language || ""} className="text-gray-400" />
+          <LanguageIcon
+            language={file.language || ""}
+            className="text-gray-400"
+          />
         )}
         <span className="truncate">{file.name}</span>
       </div>
-      {isFolder && file.children?.length > 0 && (
-        <div className="ml-2 mt-0.5 pl-1.5 border-l border-gray-700">
+
+      {isFolder && isExpanded && file.children?.length > 0 && (
+        <div className="mt-0.5">
           {file.children.map((child) => (
-            <FileTreeItem
-              key={child.id}
-              file={child}
-            />
+            <FileTreeItem key={child.id} file={child} level={level + 1} />
           ))}
         </div>
       )}

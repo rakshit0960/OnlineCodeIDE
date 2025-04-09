@@ -1,40 +1,23 @@
 "use client"
 
+import { useCreateProject } from "@/hooks/useCreateProject";
+import { useProjects } from "@/hooks/useProjects";
 import { Language, Project } from "@prisma/client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { ImSpinner8 } from "react-icons/im";
-import { useState } from "react";
 import CreateProjectDialog from "./_components/CreateProjectDialog";
 import ProjectCard from "./_components/project-card";
 
 export default function ProjPagesTemp() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const queryClient = useQueryClient();
 
-  // Query to fetch projects
-  const { data: projectsData, isLoading: isProjectsLoading, error: projectsError } = useQuery({
-    queryFn: () => {
-      return fetch("/api/projects").then((res) => res.json());
-    },
-    queryKey: ["projects"]
-  });
+
+  // Query to get projects
+  const { data: projectsData, isLoading: isProjectsLoading, error: projectsError } = useProjects();
 
   // Mutation to create a new project
-  const createProjectMutation = useMutation({
-    mutationFn: (newProject: { name: string; description: string; language: Language }) => {
-      return fetch("/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newProject),
-      }).then((res) => res.json());
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
-    },
-  });
+  const createProjectMutation = useCreateProject();
 
   // Handle project creation
   const handleCreateProject = (project: { name: string; description: string; language: Language }) => {

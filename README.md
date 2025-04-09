@@ -6,7 +6,7 @@ A modern, secure, and feature-rich online code compiler built with Next.js, Dock
 
 - **Multi-Language Support**
 
-  - Python 3.9
+  - Python
   - C/C++ (GCC)
   - Extensible architecture for adding more languages
 
@@ -46,8 +46,8 @@ A modern, secure, and feature-rich online code compiler built with Next.js, Dock
 
 - **Frontend**
 
-  - Next.js 15.2.0
-  - React 19
+  - Next.js
+  - React
   - Monaco Editor
   - TailwindCSS
   - Zustand for state management
@@ -71,10 +71,9 @@ A modern, secure, and feature-rich online code compiler built with Next.js, Dock
 
 ## 📋 Prerequisites
 
-- Node.js 18+
+- Node.js
 - Docker
 - PostgreSQL
-- npm or yarn
 
 ## 🚀 Getting Started
 

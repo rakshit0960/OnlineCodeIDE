@@ -35,6 +35,14 @@ export default function CodeEditor() {
     padding: { top: 10, bottom: 10 },
   });
 
+  // Load editor settings from localStorage
+  useEffect(() => {
+    const storedSettings = localStorage.getItem('editorSettings');
+    if (storedSettings) {
+      setEditorSettings(JSON.parse(storedSettings));
+    }
+  }, []);
+
   // Update editor content when active file changes
   useEffect(() => {
     if (activeFile?.content !== undefined) {
@@ -53,6 +61,7 @@ export default function CodeEditor() {
 
   // Function to update editor settings
   const updateEditorSettings = (newSettings: Partial<typeof editorSettings>) => {
+    localStorage.setItem('editorSettings', JSON.stringify({ ...editorSettings, ...newSettings }));
     setEditorSettings(prev => ({ ...prev, ...newSettings }));
   };
 

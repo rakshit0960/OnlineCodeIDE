@@ -85,7 +85,7 @@ export async function GET(
  * @returns The language identifier or undefined
  */
 function getLanguageFromExtension(filename: string): string | undefined {
-  const ext = path.extname(filename);
+  const ext = path.extname(filename).toLowerCase();
   switch (ext) {
     case ".js":
       return "javascript";
@@ -103,6 +103,38 @@ function getLanguageFromExtension(filename: string): string | undefined {
       return "css";
     case ".py":
       return "python";
+    case ".c":
+      return "c";
+    case ".cpp":
+      return "cpp";
+    case ".h":
+    case ".hpp":
+      return "cpp";
+    case ".cs":
+      return "csharp";
+    case ".java":
+      return "java";
+    case ".php":
+      return "php";
+    case ".rb":
+      return "ruby";
+    case ".go":
+      return "go";
+    case ".rs":
+      return "rust";
+    case ".swift":
+      return "swift";
+    case ".md":
+      return "markdown";
+    case ".xml":
+      return "xml";
+    case ".yaml":
+    case ".yml":
+      return "yaml";
+    case ".sh":
+      return "shell";
+    case ".sql":
+      return "sql";
     default:
       return undefined;
   }

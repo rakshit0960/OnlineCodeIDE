@@ -1,10 +1,10 @@
 import LanguageIcon from "@/components/LanguageIcon";
+import { useSaveFile } from "@/hooks/useSaveFile";
+import { useProjectFileStore } from "@/store/projectFileStore";
 import { Project } from "@prisma/client";
+import { useParams } from "next/navigation";
 import { FaPlay, FaSave } from "react-icons/fa";
 import { ImSpinner8 } from "react-icons/im";
-import { useProjectFileStore } from "@/store/projectFileStore";
-import { useParams } from "next/navigation";
-import { useState } from "react";
 
 interface ProjectHeaderProps {
   project: Project;
@@ -19,30 +19,12 @@ export default function ProjectHeader({
 }: ProjectHeaderProps) {
   const { activeFile } = useProjectFileStore();
   const params = useParams();
-  const projectId = params.id as string;
-  const [isSaving, setIsSaving] = useState(false);
+    const projectId = params.id as string;
+  const { mutate: saveFile, isPending: isSaving } = useSaveFile();
 
   const handleSave = async () => {
     if (!activeFile) return;
-
-    setIsSaving(true);
-    try {
-      const response = await fetch(`/api/projects/${projectId}/container/files${activeFile.path}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: activeFile.content }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save file');
-      }
-    } catch (error) {
-      console.error('Error saving file:', error);
-    } finally {
-      setIsSaving(false);
-    }
+    saveFile({ projectId, filePath: activeFile.path, content: activeFile.content || "" });
   };
 
   return (

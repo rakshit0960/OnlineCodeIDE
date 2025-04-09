@@ -1,7 +1,6 @@
 import docker from "@/lib/docker";
 import { Exec } from "dockerode";
 import { Duplex } from "stream";
-import { prisma } from "@/lib/prisma";
 
 interface ShellSession {
   exec: Exec;
@@ -11,33 +10,6 @@ interface ShellSession {
 }
 
 const activeSessions: Record<string, ShellSession> = {};
-
-/**
- * Gets a container instance by project ID
- *
- * @param projectId The ID of the project
- * @returns The container details or null if not found
- */
-export async function getContainerByProject(projectId: string) {
-  try {
-    // Find the container in the database by project ID
-    const containerData = await prisma.container.findUnique({
-      where: {
-        projectId: projectId,
-      },
-    });
-
-    if (!containerData) {
-      console.error(`No container found for project: ${projectId}`);
-      return null;
-    }
-
-    return containerData;
-  } catch (error) {
-    console.error(`Error getting container for project ${projectId}:`, error);
-    return null;
-  }
-}
 
 /**
  * Executes a command in a container and returns the output
@@ -233,5 +205,67 @@ export async function closeShellSession(containerId: string) {
   if (activeSessions[containerId]) {
     activeSessions[containerId].stream.end();
     delete activeSessions[containerId];
+  }
+}
+
+/**
+ * Creates a file or folder in a Docker container
+ * @param containerId The ID of the Docker container
+ * @param path The path where the file/folder should be created
+ * @param type The type of item to create ('FILE' or 'FOLDER')
+ * @param content Optional content for files
+ * @returns Object containing stdout and stderr output
+ */
+export async function createContainerItem(
+  containerId: string,
+  path: string,
+  type: 'FILE' | 'FOLDER',
+  content: string = ''
+): Promise<{ stdout: string; stderr: string }> {
+  try {
+    // Ensure the parent directory exists
+    const parentDir = path.substring(0, path.lastIndexOf('/'));
+    if (parentDir) {
+      const { stderr: mkdirError } = await executeContainerCommand(
+        containerId,
+        `mkdir -p "${parentDir}"`
+      );
+
+      if (mkdirError && mkdirError.trim() !== '') {
+        throw new Error(`Failed to create parent directory: ${mkdirError}`);
+      }
+    }
+
+    if (type === 'FOLDER') {
+      // Create directory
+      return await executeContainerCommand(
+        containerId,
+        `mkdir -p "${path}"`
+      );
+    } else {
+      // Create file with content
+      const tempFilePath = `/tmp/file_${Date.now()}`;
+
+      // First create the temporary file with content
+      const { stderr: createError } = await executeContainerCommand(
+        containerId,
+        `cat > ${tempFilePath} << 'EOL'\n${content}\nEOL`
+      );
+
+      if (createError && createError.trim() !== '') {
+        throw new Error(`Failed to create temporary file: ${createError}`);
+      }
+
+      // Then move it to the target location
+      const { stdout, stderr } = await executeContainerCommand(
+        containerId,
+        `mv ${tempFilePath} "${path}"`
+      );
+
+      return { stdout, stderr };
+    }
+  } catch (error) {
+    console.error(`Error creating ${type.toLowerCase()} in container ${containerId}:`, error);
+    throw error;
   }
 }
