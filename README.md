@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Online Code Compiler
 
-## Getting Started
+A modern, secure, and feature-rich online code compiler built with Next.js, Docker, and Monaco Editor. Run and test code in multiple programming languages directly in your browser with real-time output. All code execution happens within isolated Docker containers for maximum security and reliability.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Multi-Language Support**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+  - Python 3.9
+  - C/C++ (GCC)
+  - Extensible architecture for adding more languages
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Rich Code Editor**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+  - Monaco Editor (VS Code-like experience)
+  - Syntax highlighting for multiple languages
+  - Multiple editor themes
+  - Customizable font sizes and settings
+  - Line numbers and word wrap
+  - Auto-completion and IntelliSense
 
-## Learn More
+- **Project Management**
 
-To learn more about Next.js, take a look at the following resources:
+  - File explorer with tree view
+  - Multiple file support
+  - Project-based organization
+  - Real-time file saving
+  - File creation and deletion
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Secure Code Execution**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+  - Docker containerized execution
+  - Isolated environments per project
+  - Resource limitations
+  - Secure input/output handling
+  - Protected file system access
 
-## Deploy on Vercel
+- **Real-time Output**
+  - Standard output (stdout)
+  - Error output (stderr)
+  - Input support for interactive programs
+  - Execution status indicators
+  - Terminal-like interface
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🛠️ Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Frontend**
+
+  - Next.js 15.2.0
+  - React 19
+  - Monaco Editor
+  - TailwindCSS
+  - Zustand for state management
+  - React Query for data fetching
+
+- **Backend**
+
+  - Next.js API Routes
+  - Dockerode for container management
+  - Prisma for database operations
+  - NextAuth.js for authentication
+
+- **Execution Environment**
+  - Docker containers for isolated code execution
+  - Resource-limited runtime environments
+  - Secure sandboxing for user code
+
+- **Database**
+  - PostgreSQL
+  - Prisma ORM
+
+## 📋 Prerequisites
+
+- Node.js 18+
+- Docker
+- PostgreSQL
+- npm or yarn
+
+## 🚀 Getting Started
+
+1. **Clone the repository**
